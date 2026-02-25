@@ -17,6 +17,10 @@ export class MCPBridge {
 
   async connect(config: ServerConfig): Promise<void> {
     if (this.servers.has(config.name)) {
+      logger.warn({
+        msg: "Reconnecting to MCP server — old A2A tool registrations will NOT be unregistered (platform reload required to clear stale tools)",
+        name: config.name,
+      });
       await this.disconnect(config.name);
     }
 
@@ -47,7 +51,12 @@ export class MCPBridge {
       tools: a2aTools,
     };
 
-    this.ctx.registerA2AServer?.(a2aConfig);
+    if (!this.ctx.registerA2AServer) {
+      throw new Error(
+        `registerA2AServer is not available on WOPRPluginContext — cannot register tools for MCP server "${config.name}". Plugin may be running against an incompatible platform version.`,
+      );
+    }
+    this.ctx.registerA2AServer(a2aConfig);
     logger.info({
       msg: "Registered A2A tools",
       server: config.name,
