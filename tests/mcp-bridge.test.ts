@@ -114,4 +114,29 @@ describe("MCPBridge", () => {
   it("should handle disconnect of non-existent server gracefully", async () => {
     await expect(bridge.disconnect("nonexistent")).resolves.toBeUndefined();
   });
+
+  it("should call unregisterA2AServer on disconnect if available", async () => {
+    const unregisterA2AServer = vi.fn();
+    const ctxWithUnregister = {
+      registerA2AServer: vi.fn(),
+      unregisterA2AServer,
+    };
+    const bridgeWithUnregister = new MCPBridge(ctxWithUnregister as any);
+
+    // Connect first so there's something to disconnect
+    await bridgeWithUnregister.connect({ name: "test", kind: "stdio", cmd: "npx", args: [] });
+    vi.clearAllMocks();
+
+    await bridgeWithUnregister.disconnect("test");
+
+    expect(unregisterA2AServer).toHaveBeenCalledWith("mcp-test");
+  });
+
+  it("should not throw if unregisterA2AServer is not available", async () => {
+    await bridge.connect({ name: "test", kind: "stdio", cmd: "npx", args: [] });
+    vi.clearAllMocks();
+
+    // ctx has no unregisterA2AServer — should not throw
+    await expect(bridge.disconnect("test")).resolves.toBeUndefined();
+  });
 });

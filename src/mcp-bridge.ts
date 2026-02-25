@@ -1,7 +1,5 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type { A2AServerConfig, A2AToolDefinition, A2AToolResult, WOPRPluginContext } from "@wopr-network/plugin-types";
-// Note: WOPRPluginContext does not expose unregisterA2AServer — disconnecting removes the server from the bridge
-// but the A2A registration persists until the platform reloads the plugin.
 import type { ServerConfig } from "./config.js";
 import { logger } from "./logger.js";
 import { createTransport } from "./transports.js";
@@ -80,6 +78,14 @@ export class MCPBridge {
       await server.client.close();
     } catch (err) {
       logger.warn({ msg: "Error closing MCP client", name, error: String(err) });
+    }
+
+    // Unregister A2A server if platform supports it (optional future API)
+    const ctxExt = this.ctx as WOPRPluginContext & { unregisterA2AServer?: (name: string) => void };
+    if (ctxExt.unregisterA2AServer) {
+      ctxExt.unregisterA2AServer(`mcp-${name}`);
+    } else {
+      logger.warn({ msg: "unregisterA2AServer not available — A2A tools will persist until plugin reload", name });
     }
 
     this.servers.delete(name);

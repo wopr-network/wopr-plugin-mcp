@@ -32,7 +32,7 @@ const plugin: WOPRPlugin = {
 
     // Register extension for other plugins
     if (ctx.registerExtension) {
-      ctx.registerExtension("mcp", createMCPExtension(bridge));
+      ctx.registerExtension("mcp", createMCPExtension(bridge, ctx));
       logger.info("Registered MCP extension");
     }
 
