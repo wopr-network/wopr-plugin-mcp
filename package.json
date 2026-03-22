@@ -15,7 +15,7 @@
     "check": "biome check --config-path=. src/ && tsc --noEmit",
     "test": "vitest run"
   },
-  "keywords": ["wopr", "plugin", "mcp", "tools", "a2a"],
+  "keywords": ["wopr", "wopr-plugin", "plugin", "mcp", "tools", "a2a"],
   "author": "WOPR",
   "license": "MIT",
   "dependencies": {
